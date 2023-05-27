@@ -7,4 +7,7 @@ This script takes an SVG file, opens it in selenium using a firefox driver, scre
 Although this framework seems inefficent, there isn't a clean way to "activate" or iterate through animations in an SVG, which is why popular frameworks haven't built a solution to this problem yet. 
 
 ## Example
+### Usage
+`python svg2gif.py <svg_file>`
+
 An example [GIF](https://github.com/proselotis/SVG2GIF/blob/main/example/test.gif) and [SVG](https://github.com/proselotis/SVG2GIF/blob/main/example/test.svg) can be seen in the [example folder](https://github.com/proselotis/SVG2GIF/tree/main/example)
