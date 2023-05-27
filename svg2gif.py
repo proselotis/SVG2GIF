@@ -2,9 +2,6 @@
 Most SVG to Gif online generators are using magick's command
 this was not sufficent for my use case due to the outputs not formatting correctly 
 and scalability
-
-Author: Proselotis
-Date: 2023 May 27
 """
 
 
@@ -13,17 +10,25 @@ import contextlib
 import re
 import os 
 import shutil
+import sys
 
 from PIL import Image
 from bs4 import BeautifulSoup
 from math import ceil
 from selenium import webdriver
 
+
 ########################################################
 # Constants
 ########################################################
-ABSOLUTE_FILE_PATH = "Users/<USERNAME>/dev-projects/svg/"
-FILE_NAME = "test.svg"
+if len(sys.argv) == 2:
+	FILE_NAME = sys.argv[1]
+	ABSOLUTE_FILE_PATH = os.getcwd()
+elif len(sys.argv) == 1:
+	ABSOLUTE_FILE_PATH = os.getcwd()
+	FILE_NAME = "examples/test.svg"
+else:
+	raise Exception("Usage: python svg2gif.py <SVG_file>")
 SCREENSHOTS_PER_SECOND = 11 # This arbitrary number worked but is not perfect
 
 ########################################################
@@ -53,7 +58,7 @@ def _clean_time_element(time):
 # Beautiful soup parse to find total duration of SVG
 ########################################################
 
-svg_file = open(FILE_PATH, 'r+')
+svg_file = open(FILE_NAME, 'r+')
 soup = BeautifulSoup(svg_file,features="html.parser")
 
 
@@ -73,14 +78,14 @@ USE_TMP_PATH = False
 if total_time_animated < 20:
 	USE_TMP_PATH = True 
 
-	file_text = (open(FILE_PATH).read())
+	file_text = (open(FILE_NAME).read())
 	for animation_timer in animation_timers:
 		if animation_timer % 1 == 0:
 			file_text = file_text.replace(f"{int(animation_timer)}s",f"{int(animation_timer * 2)}s")
 		else:
 			file_text = file_text.replace(f"{animation_timer}s",f"{animation_timer * 2}s")
 
-	with open(f"TMP_{FILE_PATH}", "w") as text_file:
+	with open(f"TMP_{FILE_NAME}", "w") as text_file:
 		print(file_text, file=text_file)
 
 
@@ -99,9 +104,9 @@ driver = webdriver.Firefox()
 
 # In Selenium you need the prefix file:/// to open a local file
 if USE_TMP_PATH:
-	driver.get(f"file:///{ABSOLUTE_FILE_PATH}/TMP_{FILE_PATH}")
+	driver.get(f"file:///{ABSOLUTE_FILE_PATH}/TMP_{FILE_NAME}")
 else:
-	driver.get(f"file:///{ABSOLUTE_FILE_PATH}/{FILE_PATH}")
+	driver.get(f"file:///{ABSOLUTE_FILE_PATH}/{FILE_NAME}")
 
 if USE_TMP_PATH:
 	total_screenshots = int(SCREENSHOTS_PER_SECOND * (total_time_animated *2))
@@ -121,7 +126,7 @@ driver.quit()
 
 # filepaths
 fp_in = "_screenshots/*.png"
-fp_out = f'{FILE_PATH.replace(".svg",".gif")}'
+fp_out = f'{FILE_NAME.replace(".svg",".gif")}'
 
 # use exit stack to automatically close opened images
 with contextlib.ExitStack() as stack:
@@ -147,7 +152,7 @@ with contextlib.ExitStack() as stack:
 # Remove temporary directories
 ########################################################
 if USE_TMP_PATH:
-	os.remove(f"TMP_{FILE_PATH}")
+	os.remove(f"TMP_{FILE_NAME}")
 shutil.rmtree("_screenshots")
 
 #Optional delete of selenium logs
